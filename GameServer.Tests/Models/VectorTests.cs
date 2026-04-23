@@ -117,7 +117,7 @@ public class VectorTests
     [Fact]
     public void EqualityOperator_WithNullLeft_ReturnsFalse()
     {
-        Vector? a = null;
+        Vector a = null;
         var b = new Vector(1, 2, 3);
         Assert.False(a == b);
     }
@@ -125,15 +125,15 @@ public class VectorTests
     [Fact]
     public void EqualityOperator_WithBothNull_ReturnsTrue()
     {
-        Vector? a = null;
-        Vector? b = null;
+        Vector a = null;
+        Vector b = null;
         Assert.True(a == b);
     }
 
     [Fact]
     public void InequalityOperator_WithNullLeft_ReturnsTrue()
     {
-        Vector? a = null;
+        Vector a = null;
         var b = new Vector(1, 2, 3);
         Assert.True(a != b);
     }
