@@ -2,7 +2,7 @@ using System.Linq;
 
 namespace GameServer.Models;
 
-public class Vector
+public class Vector : IEquatable<Vector>
 {
     private readonly int[] _components;
 
@@ -46,9 +46,14 @@ public class Vector
         return new Vector(result);
     }
 
-    public override bool Equals(object? obj)
+    public bool Equals(Vector? other)
     {
-        if (obj is not Vector other)
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        if (ReferenceEquals(other, null))
         {
             return false;
         }
@@ -61,14 +66,11 @@ public class Vector
         return _components.SequenceEqual(other._components);
     }
 
+    public override bool Equals(object? obj) => Equals(obj as Vector);
+
     public static bool operator ==(Vector a, Vector b)
     {
-        if (ReferenceEquals(a, null))
-        {
-            return ReferenceEquals(b, null);
-        }
-
-        return a.Equals(b);
+        return object.Equals(a, b);
     }
 
     public static bool operator !=(Vector a, Vector b)
