@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace GameServer.Models;
 
 public class Vector
@@ -56,15 +58,7 @@ public class Vector
             return false;
         }
 
-        for (int i = 0; i < Dimensions; i++)
-        {
-            if (this[i] != other[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return _components.SequenceEqual(other._components);
     }
 
     public static bool operator ==(Vector a, Vector b)
@@ -84,12 +78,7 @@ public class Vector
 
     public override int GetHashCode()
     {
-        int hash = 17;
-        foreach (var component in _components)
-        {
-            hash = hash * 31 + component;
-        }
-        return hash;
+        return _components.Aggregate(17, (hash, component) => hash * 31 + component);
     }
 
     public override string ToString()
