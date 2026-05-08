@@ -34,10 +34,27 @@ public class VectorTests
     }
 
     [Fact]
+    public void Addition_WithOppositeVectors_ReturnsZeroVector()
+    {
+        var a = new Vector(1, -1, 2);
+        var b = new Vector(-1, 1, -2);
+        var result = a + b;
+        Assert.Equal(new Vector(0, 0, 0), result);
+    }
+
+    [Fact]
     public void Addition_WithDifferentDimensions_ThrowsArgumentException()
     {
         var a = new Vector(1, 2);
         var b = new Vector(1, 2, 3);
+        Assert.Throws<ArgumentException>(() => a + b);
+    }
+
+    [Fact]
+    public void Addition_WithDifferentDimensionsReversed_ThrowsArgumentException()
+    {
+        var a = new Vector(1, 2, 3);
+        var b = new Vector(1, 2);
         Assert.Throws<ArgumentException>(() => a + b);
     }
 
