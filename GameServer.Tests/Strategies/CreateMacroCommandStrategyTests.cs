@@ -1,4 +1,3 @@
-#nullable disable
 using GameServer.Commands;
 using GameServer.Interfaces;
 using GameServer.IoC;
@@ -10,51 +9,43 @@ namespace GameServer.Tests.Strategies;
 public class CreateMacroCommandStrategyTests
 {
     [Fact]
-    public void CreateMacroCommand_CreatesMacroCommandFromKeys()
+    public void Resolve_AllDependenciesPresent_ReturnsMacroCommand()
     {
-        global::GameServer.IoC.Ioc.Clear();
-        var mockCommand1 = new MockCommand();
-        var mockCommand2 = new MockCommand();
-        global::GameServer.IoC.Ioc.Register("TestCommand1", (args) => mockCommand1);
-        global::GameServer.IoC.Ioc.Register("TestCommand2", (args) => mockCommand2);
-        
-        var strategy = new CreateMacroCommandStrategy();
-        var macroCommand = strategy.CreateMacroCommand(new object[] { "TestCommand1", "TestCommand2" });
-        
-        Assert.NotNull(macroCommand);
-        Assert.IsType<MacroCommand>(macroCommand);
-        
-        macroCommand.Execute();
-        Assert.True(mockCommand1.Executed);
-        Assert.True(mockCommand2.Executed);
+        Ioc.Clear();
+
+        var mock1 = new MockCommand();
+        var mock2 = new MockCommand();
+
+        Ioc.Register("Specs.Test", new string[] { "Command.1", "Command.2" });
+        Ioc.Register("Command.1", mock1);
+        Ioc.Register("Command.2", mock2);
+
+        var strategy = new CreateMacroCommandStrategy("Test");
+        var macro = strategy.Resolve();
+
+        Assert.NotNull(macro);
+
+        macro.Execute();
+        Assert.True(mock1.Executed);
+        Assert.True(mock2.Executed);
     }
 
     [Fact]
-    public void CreateMacroCommand_WhenKeysIsNull_ThrowsException()
+    public void Resolve_MissingDependency_ThrowsException()
     {
-        var strategy = new CreateMacroCommandStrategy();
-        Assert.Throws<ArgumentException>(() => strategy.CreateMacroCommand(null));
-    }
+        Ioc.Clear();
 
-    [Fact]
-    public void CreateMacroCommand_WhenKeysIsEmpty_ThrowsException()
-    {
-        var strategy = new CreateMacroCommandStrategy();
-        Assert.Throws<ArgumentException>(() => strategy.CreateMacroCommand(new object[0]));
-    }
+        var strategy = new CreateMacroCommandStrategy("Test");
+        Assert.Throws<InvalidOperationException>(() => strategy.Resolve());
 
-    [Fact]
-    public void CreateMacroCommand_WhenKeyIsNull_ThrowsException()
-    {
-        global::GameServer.IoC.Ioc.Clear();
-        var strategy = new CreateMacroCommandStrategy();
-        Assert.Throws<ArgumentException>(() => strategy.CreateMacroCommand(new object[] { null }));
+        Ioc.Register("Specs.Test", new string[] { "Command.Missing" });
+        Assert.Throws<InvalidOperationException>(() => strategy.Resolve());
     }
 
     private class MockCommand : ICommand
     {
         public bool Executed { get; private set; }
-        
+
         public void Execute()
         {
             Executed = true;

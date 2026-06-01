@@ -1,28 +1,38 @@
-#nullable disable
+using GameServer.Commands;
 using GameServer.Interfaces;
-using System.Linq;
+using GameServer.IoC;
 
 namespace GameServer.Strategies;
 
 public class CreateMacroCommandStrategy
 {
-    public ICommand CreateMacroCommand(object[] commandKeys)
+    private readonly string _commandSpec;
+
+    public CreateMacroCommandStrategy(string commandSpec)
     {
-        if (commandKeys == null || commandKeys.Length == 0)
+        _commandSpec = commandSpec;
+    }
+
+    public ICommand Resolve()
+    {
+        var spec = (string[])Ioc.Resolve("Specs." + _commandSpec);
+        var commands = ResolveCommands(spec, 0);
+        return new MacroCommand(commands);
+    }
+
+    private ICommand[] ResolveCommands(string[] specs, int index)
+    {
+        if (index >= specs.Length)
         {
-            throw new ArgumentException("Command keys cannot be null or empty");
+            return Array.Empty<ICommand>();
         }
 
-        var commands = commandKeys.Select((key, index) =>
-        {
-            if (key == null)
-                throw new ArgumentException($"Command key at index {index} cannot be null or empty");
-            var commandKey = key.ToString();
-            if (string.IsNullOrEmpty(commandKey))
-                throw new ArgumentException($"Command key at index {index} cannot be null or empty");
-            return (ICommand)IoC.Ioc.Resolve(commandKey);
-        }).ToArray();
+        var command = (ICommand)Ioc.Resolve(specs[index]);
+        var rest = ResolveCommands(specs, index + 1);
 
-        return new Commands.MacroCommand(commands);
+        var result = new ICommand[rest.Length + 1];
+        result[0] = command;
+        Array.Copy(rest, 0, result, 1, rest.Length);
+        return result;
     }
 }
