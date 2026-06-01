@@ -1,6 +1,4 @@
-#nullable disable
 using GameServer.Commands;
-using GameServer.Interfaces;
 using GameServer.IoC;
 using Xunit;
 
@@ -9,41 +7,26 @@ namespace GameServer.Tests.Commands;
 public class RegisterIoCDependencyMacroMoveRotateTests
 {
     [Fact]
-    public void Execute_RegistersMacroMoveAndMacroRotate()
+    public void Execute_RegistersSpecsMoveInIoc()
     {
         Ioc.Clear();
+        var command = new RegisterIoCDependencyMacroMoveRotate();
+        command.Execute();
 
-        var mockMove = new MockCommand();
-        var mockRotate = new MockCommand();
-
-        Ioc.Register("Specs.Move", new string[] { "Commands.Move" });
-        Ioc.Register("Specs.Rotate", new string[] { "Commands.Rotate" });
-        Ioc.Register("Commands.Move", mockMove);
-        Ioc.Register("Commands.Rotate", mockRotate);
-
-        var registerCommand = new RegisterMacroMoveRotateCommand();
-        registerCommand.Execute();
-
-        var macroMove = (MacroCommand)Ioc.Resolve("Macro.Move");
-        var macroRotate = (MacroCommand)Ioc.Resolve("Macro.Rotate");
-
-        Assert.NotNull(macroMove);
-        Assert.NotNull(macroRotate);
-
-        macroMove.Execute();
-        Assert.True(mockMove.Executed);
-
-        macroRotate.Execute();
-        Assert.True(mockRotate.Executed);
+        var spec = Ioc.Resolve("Specs.Move");
+        var moveSpec = Assert.IsType<string[]>(spec);
+        Assert.Contains("Commands.Move", moveSpec);
     }
 
-    private class MockCommand : ICommand
+    [Fact]
+    public void Execute_RegistersSpecsRotateInIoc()
     {
-        public bool Executed { get; private set; }
+        Ioc.Clear();
+        var command = new RegisterIoCDependencyMacroMoveRotate();
+        command.Execute();
 
-        public void Execute()
-        {
-            Executed = true;
-        }
+        var spec = Ioc.Resolve("Specs.Rotate");
+        var rotateSpec = Assert.IsType<string[]>(spec);
+        Assert.Contains("Commands.Rotate", rotateSpec);
     }
 }

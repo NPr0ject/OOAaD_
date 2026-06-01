@@ -1,7 +1,5 @@
-#nullable disable
-using GameServer.Interfaces;
 using GameServer.IoC;
-using GameServer.Strategies;
+using GameServer.Interfaces;
 
 namespace GameServer.Commands;
 
@@ -9,16 +7,7 @@ public class RegisterIoCDependencyMacroMoveRotate : ICommand
 {
     public void Execute()
     {
-        Ioc.Register("Macro.Move", (args) =>
-        {
-            var strategy = new CreateMacroCommandStrategy("Move");
-            return strategy.Resolve(args);
-        });
-
-        Ioc.Register("Macro.Rotate", (args) =>
-        {
-            var strategy = new CreateMacroCommandStrategy("Rotate");
-            return strategy.Resolve(args);
-        });
+        Ioc.Register("Specs.Move", new[] { "Commands.Move" });
+        Ioc.Register("Specs.Rotate", new[] { "Commands.Rotate" });
     }
 }
