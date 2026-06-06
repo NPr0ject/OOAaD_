@@ -1,4 +1,3 @@
-#nullable disable
 using GameServer.Interfaces;
 
 namespace GameServer.Commands;
@@ -9,14 +8,22 @@ public class MacroCommand : ICommand
 
     public MacroCommand(ICommand[] commands)
     {
-        _commands = commands ?? throw new ArgumentException("Commands cannot be null");
+        _commands = commands;
     }
 
     public void Execute()
     {
-        foreach (var command in _commands)
+        ExecuteCommands(0);
+    }
+
+    private void ExecuteCommands(int index)
+    {
+        if (index >= _commands.Length)
         {
-            command.Execute();
+            return;
         }
+
+        _commands[index].Execute();
+        ExecuteCommands(index + 1);
     }
 }

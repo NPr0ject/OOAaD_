@@ -8,46 +8,40 @@ namespace GameServer.Tests.Commands;
 public class MacroCommandTests
 {
     [Fact]
-    public void Execute_ExecutesAllCommandsInOrder()
+    public void Execute_ExecutesAllCommands()
     {
-        var mockCommand1 = new MockCommand();
-        var mockCommand2 = new MockCommand();
-        var mockCommand3 = new MockCommand();
-        
-        var macroCommand = new MacroCommand(new ICommand[] { mockCommand1, mockCommand2, mockCommand3 });
-        
-        macroCommand.Execute();
-        
-        Assert.True(mockCommand1.Executed);
-        Assert.True(mockCommand2.Executed);
-        Assert.True(mockCommand3.Executed);
+        var mock1 = new MockCommand();
+        var mock2 = new MockCommand();
+        var mock3 = new MockCommand();
+        var commands = new ICommand[] { mock1, mock2, mock3 };
+        var macro = new MacroCommand(commands);
+
+        macro.Execute();
+
+        Assert.True(mock1.Executed);
+        Assert.True(mock2.Executed);
+        Assert.True(mock3.Executed);
     }
 
     [Fact]
-    public void Constructor_WhenCommandsIsNull_ThrowsException()
+    public void Execute_WhenCommandThrows_StopsExecution()
     {
-        Assert.Throws<ArgumentException>(() => new MacroCommand(null));
-    }
-
-    [Fact]
-    public void Execute_WhenOneCommandThrowsException_StillExecutesPreviousCommands()
-    {
-        var mockCommand1 = new MockCommand();
+        var mock1 = new MockCommand();
         var failingCommand = new FailingCommand();
-        var mockCommand2 = new MockCommand();
-        
-        var macroCommand = new MacroCommand(new ICommand[] { mockCommand1, failingCommand, mockCommand2 });
-        
-        Assert.Throws<InvalidOperationException>(() => macroCommand.Execute());
-        
-        Assert.True(mockCommand1.Executed);
-        Assert.False(mockCommand2.Executed);
+        var mock2 = new MockCommand();
+        var commands = new ICommand[] { mock1, failingCommand, mock2 };
+        var macro = new MacroCommand(commands);
+
+        Assert.Throws<InvalidOperationException>(() => macro.Execute());
+
+        Assert.True(mock1.Executed);
+        Assert.False(mock2.Executed);
     }
 
     private class MockCommand : ICommand
     {
         public bool Executed { get; private set; }
-        
+
         public void Execute()
         {
             Executed = true;

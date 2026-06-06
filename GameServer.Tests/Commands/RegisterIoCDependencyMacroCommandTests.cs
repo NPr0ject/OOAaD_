@@ -1,6 +1,7 @@
 #nullable disable
 using GameServer.Commands;
 using GameServer.Interfaces;
+using GameServer.IoC;
 using Xunit;
 
 namespace GameServer.Tests.Commands;
@@ -10,27 +11,26 @@ public class RegisterIoCDependencyMacroCommandTests
     [Fact]
     public void Execute_RegistersMacroCommandInIoC()
     {
-        global::GameServer.IoC.Ioc.Clear();
-        var mockCommand1 = new MockCommand();
-        var mockCommand2 = new MockCommand();
-        global::GameServer.IoC.Ioc.Register("TestCommand1", (args) => mockCommand1);
-        global::GameServer.IoC.Ioc.Register("TestCommand2", (args) => mockCommand2);
-        
+        Ioc.Clear();
+        var mock1 = new MockCommand();
+        var mock2 = new MockCommand();
+        var commands = new ICommand[] { mock1, mock2 };
+
         var registerCommand = new RegisterIoCDependencyMacroCommand();
         registerCommand.Execute();
-        
-        var macroCommand = (MacroCommand)global::GameServer.IoC.Ioc.Resolve("Commands.Macro", "TestCommand1", "TestCommand2");
+
+        var macroCommand = (MacroCommand)Ioc.Resolve("Commands.Macro", new object[] { commands });
         Assert.NotNull(macroCommand);
-        
+
         macroCommand.Execute();
-        Assert.True(mockCommand1.Executed);
-        Assert.True(mockCommand2.Executed);
+        Assert.True(mock1.Executed);
+        Assert.True(mock2.Executed);
     }
 
     private class MockCommand : ICommand
     {
         public bool Executed { get; private set; }
-        
+
         public void Execute()
         {
             Executed = true;

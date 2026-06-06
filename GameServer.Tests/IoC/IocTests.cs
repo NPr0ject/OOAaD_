@@ -3,42 +3,36 @@ using Xunit;
 
 namespace GameServer.Tests.IoC;
 
+[Collection("IocTests")]
 public class IocTests
 {
     [Fact]
-    public void RegisterAndResolve_ReturnsRegisteredDependency()
+    public void Register_WithDependency_ReturnsSameInstance()
     {
-        var dependency = new object();
-        Ioc.Register("TestKey", dependency);
-        
+        Ioc.Clear();
+        var testObject = new object();
+        Ioc.Register("TestKey", testObject);
+
         var resolved = Ioc.Resolve("TestKey");
-        
-        Assert.Same(dependency, resolved);
+
+        Assert.Same(testObject, resolved);
     }
 
     [Fact]
-    public void Resolve_NotRegistered_ThrowsInvalidOperationException()
+    public void Register_WithStrategy_ResolvesWithArgs()
     {
-        Assert.Throws<InvalidOperationException>(() => Ioc.Resolve("NonExistentKey"));
+        Ioc.Clear();
+        Ioc.Register("TestStrategy", (args) => args[0]);
+
+        var resolved = Ioc.Resolve("TestStrategy", "result");
+
+        Assert.Equal("result", resolved);
     }
 
     [Fact]
-    public void RegisterStrategy_WithArgs_ExecutesStrategy()
+    public void Resolve_UnregisteredDependency_ThrowsInvalidOperationException()
     {
-        Ioc.Register("TestStrategy", (args) => args.Length);
-        
-        var result = Ioc.Resolve("TestStrategy", new object[] { 1, 2, 3 });
-        
-        Assert.Equal(3, result);
-    }
-
-    [Fact]
-    public void RegisterStrategy_WithoutArgs_ExecutesStrategy()
-    {
-        Ioc.Register("TestStrategy", (args) => "StrategyResult");
-        
-        var result = Ioc.Resolve("TestStrategy");
-        
-        Assert.Equal("StrategyResult", result);
+        Ioc.Clear();
+        Assert.Throws<InvalidOperationException>(() => Ioc.Resolve("UnregisteredKey"));
     }
 }

@@ -1,5 +1,6 @@
 #nullable disable
 using GameServer.Interfaces;
+using GameServer.IoC;
 
 namespace GameServer.Commands;
 
@@ -7,13 +8,9 @@ public class RegisterIoCDependencyMacroCommand : ICommand
 {
     public void Execute()
     {
-        IoC.Ioc.Register("Commands.Macro", (args) =>
+        Ioc.Register("Commands.Macro", (args) =>
         {
-            var commands = new ICommand[args.Length];
-            for (int i = 0; i < args.Length; i++)
-            {
-                commands[i] = (ICommand)IoC.Ioc.Resolve(args[i].ToString());
-            }
+            var commands = (ICommand[])args[0];
             return new MacroCommand(commands);
         });
     }
